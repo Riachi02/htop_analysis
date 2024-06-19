@@ -107,14 +107,17 @@ def update_canvas(canvas):
 def get_running_applications():
     output = subprocess.check_output("wmctrl -l -p", shell=True)
     lines = output.decode().split('\n')[:-1]
-    
+
     for line in lines:
         line = line.split()
-        if line[2] not in PIDs:
+        if line[2] == "0":
+            continue
+        elif line[2] not in PIDs:
             PIDs[line[2]] = []
 
     for pid in PIDs:
         if len(PIDs[pid]) == 0:
+            print(pid, PIDs[pid])
             output = subprocess.check_output("cat /proc/" + str(pid) + "/comm", shell=True)
             name = output.decode().lower()[:-1]
             PIDs[pid].append(name)
@@ -130,7 +133,6 @@ def get_running_applications():
                 PIDs[pid].append(img_path[3])
             else:
                 PIDs[pid].append(img_path[0])
-    print(PIDs)
     titles = []
     image_paths = []
     for key, value in PIDs.items():
@@ -245,13 +247,6 @@ def main():
     table_frame.pack(fill=BOTH, expand=True)
     app = ProcessManagerApp(table_frame)'''
     ttk.Label(advanced_tab, text="Lista dei processi attivi:", style='TLabel').pack(pady=20)
-
-    output = subprocess.check_output("top -b -n 1 | head -n 17", shell=True)
-    lines = output.decode().split('\n')
-
-    header_index = next(i for i, line in enumerate(lines) if 'PID' in line)
-    header = tuple(lines[header_index].strip().split())
-    data = [tuple(line.strip().split()) for line in lines[header_index + 1:] if line.strip()]
 
     table_frame = ttk.Frame(advanced_tab, style='TFrame')
     table_frame.pack(fill=BOTH, expand=True)
