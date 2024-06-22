@@ -1,11 +1,7 @@
-import subprocess
+import subprocess, sys
 from tkinter import *
-from tkinter import simpledialog
-from tkinter import ttk
 from PIL import Image, ImageTk
-import pandas as pd
 from manage_process_con_disable import *
-import sys
 
 PIDs = {}
 
@@ -174,14 +170,6 @@ def main():
     tab_control.add(advanced_tab, text="Advanced Functions")
     tab_control.pack(expand=1, fill="both")
 
-    '''# Creazione del tab control
-    tab_control = ttk.Notebook(root)
-    main_tab = Frame(tab_control, bg='black')
-    tab_control.add(main_tab, text="Basic Functions")
-    advanced_tab = Frame(tab_control, bg='black')
-    tab_control.add(advanced_tab, text="Advanced Functions")
-    tab_control.pack(expand=1, fill="both")'''
-
     print(image_paths)
 
     # Dimensioni desiderate per le immagini (larghezza, altezza)
@@ -194,15 +182,6 @@ def main():
     x_icon_image = Image.open(x_icon_path).convert("RGBA")
     x_icon_image = x_icon_image.resize(x_icon_size, Image.LANCZOS)
     x_icon_photo = ImageTk.PhotoImage(x_icon_image)
-
-    '''# Descrizione sopra il canvas
-    description_label = Label(main_tab, text="Applicazioni utente in esecuzione", font=("Helvetica", 18), bg='black', fg='white')
-    description_label.pack(pady=10)
-
-    # Crea un canvas per posizionare le immagini e le icone "X"
-    canvas = Canvas(main_tab, bg='black')
-    canvas.pack(fill=BOTH, expand=True)
-    images = load_images(image_paths, image_size)'''
 
     description_label = ttk.Label(main_tab, text="Applicazioni utente in esecuzione", style='TLabel')
     description_label.pack(pady=10)
@@ -233,19 +212,6 @@ def main():
 
     #********************** Advanced tab *************************#
 
-    '''Label(advanced_tab, text="Lista dei processi attivi:", bg='black', fg='white').pack(pady=20)
-
-    output = subprocess.check_output("top -b -n 1 | head -n 17", shell=True)
-    lines = output.decode().split('\n')
-    
-    # Trova l'indice della riga che inizia con 'PID'
-    header_index = next(i for i, line in enumerate(lines) if 'PID' in line)
-    header = tuple(lines[header_index].strip().split())
-    data = [tuple(line.strip().split()) for line in lines[header_index + 1:] if line.strip()]
-
-    table_frame = Frame(advanced_tab, bg='black')
-    table_frame.pack(fill=BOTH, expand=True)
-    app = ProcessManagerApp(table_frame)'''
     ttk.Label(advanced_tab, text="Lista dei processi attivi:", style='TLabel').pack(pady=20)
 
     table_frame = ttk.Frame(advanced_tab, style='TFrame')
