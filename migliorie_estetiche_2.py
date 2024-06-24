@@ -3,7 +3,7 @@ from tkinter import *
 from tkinter import simpledialog, messagebox, ttk
 from PIL import Image, ImageTk
 import pandas as pd
-from manage_process_con_disable import *
+from htop_analysis.Process_Manager import *
 import sys
 import os
 

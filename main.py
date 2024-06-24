@@ -1,7 +1,7 @@
 import subprocess, sys
 from tkinter import *
 from PIL import Image, ImageTk
-from manage_process_con_disable import *
+from Process_Manager import *
 
 PIDs = {}
 
@@ -11,7 +11,6 @@ def check_root_user(root):
         messagebox.showwarning("Attenzione", "Non è possibile eseguire l'applicazione come utente root. Accedere con un altro utente per proseguire")
         root.destroy()
         sys.exit("Applicazione terminata perché eseguita come utente root")
-
 
 # Funzione per caricare le immagini
 def load_images(image_paths, size):
@@ -36,18 +35,15 @@ def run_sudo_command(command):
         try:
             # Usa il comando sudo con la password fornita
             result = subprocess.run(f'echo {password} | sudo -S -k {command}', shell=True, check=True, text=True, capture_output=True)
-            #stderr = result.stderr
             if result.returncode == 0:
                 messagebox.showinfo("Success", "Application termineted successfully")
                 return True
             else:
                 return False
-            #return result.returncode == 0  # Ritorna True se il comando ha avuto successo
         except subprocess.CalledProcessError as e:
             messagebox.showerror("Error", f"Failed to kill application\n{e.stderr}")
             return False
     else:
-        #output_text.set("Password non fornita.")
         messagebox.showerror("Error", "Password not provided")
         return False
 
@@ -103,32 +99,31 @@ def update_canvas(canvas):
 def get_running_applications():
     output = subprocess.check_output("wmctrl -l -p", shell=True)
     lines = output.decode().split('\n')[:-1]
-
+    global PIDs
+    PIDs = {}
     for line in lines:
         line = line.split()
-        if line[2] == "0":
+        if line[2] == "0": # per escludere sè stesso come applicazione
             continue
-        elif line[2] not in PIDs:
+        else:
             PIDs[line[2]] = []
 
     for pid in PIDs:
-        if len(PIDs[pid]) == 0:
-            print(pid, PIDs[pid])
-            output = subprocess.check_output("cat /proc/" + str(pid) + "/comm", shell=True)
-            name = output.decode().lower()[:-1]
-            PIDs[pid].append(name)
-            command = ["find", "/usr/share/", "-name", f"*{name}*.png"]
+        output = subprocess.check_output("cat /proc/" + str(pid) + "/comm", shell=True)
+        name = output.decode().lower()[:-1]
+        PIDs[pid].append(name)
+        command = ["find", "/usr/share/", "-name", f"*{name}*.png"]
+        output = subprocess.run(command, capture_output=True, text=True)
+        if len(output.stdout.split('\n')) < 2:
+            command = ["find", "/", "-name", f"*{name}*.png"]
             output = subprocess.run(command, capture_output=True, text=True)
-            if len(output.stdout.split('\n')) < 2:
-                command = ["find", "/", "-name", f"*{name}*.png"]
-                output = subprocess.run(command, capture_output=True, text=True)
-            img_path = output.stdout.split('\n')
-            if(len(img_path) == 1):
-                PIDs[pid].append("./htop_analysis/not-found.png")
-            if ("16x16" in img_path[0]):
-                PIDs[pid].append(img_path[3])
-            else:
-                PIDs[pid].append(img_path[0])
+        img_path = output.stdout.split('\n')
+        if(len(img_path) == 1):
+            PIDs[pid].append("./htop_analysis/not-found.png")
+        if ("16x16" in img_path[0]):
+            PIDs[pid].append(img_path[3])
+        else:
+            PIDs[pid].append(img_path[0])
     titles = []
     image_paths = []
     for key, value in PIDs.items():
@@ -148,7 +143,7 @@ def main():
 
     root = Tk()
     root.geometry("800x600")
-    root.title("Htop Analisys")
+    root.title("Task Manager")
     root.configure(bg='black')
 
     check_root_user(root)
@@ -169,8 +164,6 @@ def main():
     advanced_tab = ttk.Frame(tab_control, style='TFrame')
     tab_control.add(advanced_tab, text="Advanced Functions")
     tab_control.pack(expand=1, fill="both")
-
-    print(image_paths)
 
     # Dimensioni desiderate per le immagini (larghezza, altezza)
     image_size = (100, 100)
@@ -212,7 +205,7 @@ def main():
 
     #********************** Advanced tab *************************#
 
-    ttk.Label(advanced_tab, text="Lista dei processi attivi:", style='TLabel').pack(pady=20)
+    ttk.Label(advanced_tab, text="Lista processi attivi", style='TLabel').pack(pady=20)
 
     table_frame = ttk.Frame(advanced_tab, style='TFrame')
     table_frame.pack(fill=BOTH, expand=True)

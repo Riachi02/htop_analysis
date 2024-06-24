@@ -4,7 +4,7 @@ from tkinter import simpledialog
 from tkinter import ttk
 from PIL import Image, ImageTk, ImageEnhance
 import pandas as pd
-from manage_process_con_disable import *
+from htop_analysis.Process_Manager import *
 import sys
 
 PIDs = {}
